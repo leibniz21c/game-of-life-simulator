@@ -41,7 +41,7 @@ void
 usage ()
 {
     fprintf(stdout, BROWN "Usage: " NO_COLOR);
-    fprintf(stdout, "%s [options] input file\n\n", __PROGRAM_NAME__);
+    fprintf(stdout, "%s [options] [file_name]\n\n", __PROGRAM_NAME__);
 }
 
 /*
@@ -65,6 +65,8 @@ options ()
                     "\t\tPrints %s version\n\n", __PROGRAM_NAME__);
     fprintf(stdout, GRAY "\t-h|--help\n" NO_COLOR
                     "\t\tPrints this help message\n\n");
+    fprintf(stdout, GRAY "\t-n|--new\n" NO_COLOR
+                    "\t\tCreate new cell map\n\n");
     fprintf(stdout, GRAY "\t--no-color\n" NO_COLOR
                     "\t\tDoes not use colors for printing\n\n");
 
