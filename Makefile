@@ -47,14 +47,8 @@ CC := cc
 # Defines the language standards for GCC
 STD := -std=gnu99 # See man gcc for more options
 
-# Protection for stack-smashing attack
-STACK := -fstack-protector-all -Wstack-protector
-
-# Specifies to GCC the required warnings
-WARNS := -Wall -Wextra -pedantic # -pedantic warns on language standards
-
 # Flags for compiling
-CFLAGS := -O3 $(STD) $(STACK) $(WARNS)
+CFLAGS := -O3 $(STD)
 
 # Debug options
 DEBUG := -g3 -DDEBUG=1
