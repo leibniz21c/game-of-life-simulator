@@ -71,16 +71,13 @@ _get_cell_map_need_to_check(map_t map)
     int i, j;
     map_t cellmap = init_map();
 
-    for (i = 0; i < map.num_of_cells;i ++) {
-        cellmap = _cell_birth(
-            cellmap,
-            map.coordinate_arr[i]);
+    for (i = 0; i < map.num_of_cells; i ++) {
+        cellmap = _cell_birth(cellmap, map.coordinate_arr[i]);
         for (j = (int)north_east; j < 8; j ++)
-            cellmap = _cell_birth(
-                cellmap,
-                get_onestep_coordinate(
-                    map.coordinate_arr[i],
-                    j));
+            cellmap = _cell_birth(cellmap, get_onestep_coordinate(map.coordinate_arr[i], j));
+        
+        printf("i == %d\n", i);
+        print_map(cellmap);
     }
 
     return cellmap;
@@ -106,12 +103,13 @@ _get_next_map(map_t map)
         searched_index = _search_coordinate(map, check_pos, 0, map.num_of_cells - 1);
         num_of_adjacent_living_cells = _get_num_of_adjacent_living_cells(map, check_pos);
 
-        if ((SEARCH_NO_ELEMENT == searched_index)
-            && (_get_num_of_adjacent_living_cells(map, check_pos) == RULE1_CONSTANT))
+        if (SEARCH_NO_ELEMENT == searched_index
+            && _get_num_of_adjacent_living_cells(map, check_pos) == RULE1_CONSTANT)
                 /* Dead cell with 3 adjacent alived cells case */
                 new_map = _cell_birth(new_map, check_pos);
-        else if ((SEARCH_NO_ELEMENT != searched_index)
-                  && !(num_of_adjacent_living_cells == RULE2_CONSTANT1 || RULE2_CONSTANT2))
+        else if (SEARCH_NO_ELEMENT != searched_index
+                  && !(num_of_adjacent_living_cells == RULE2_CONSTANT1 
+                      || num_of_adjacent_living_cells == RULE2_CONSTANT2))
                 /* Living cell with not 2 or 3 adjacent living cells case */
                 new_map = _cell_death(new_map, check_pos);
     }
@@ -195,8 +193,10 @@ _cell_birth(map_t map, coordinate_t pos)
      * Since map already living cell at the pos,
      * we don't need to move anything.
      */
-    if (_search_coordinate(map, pos, 0, map.num_of_cells - 1) != SEARCH_NO_ELEMENT)
+    if (_search_coordinate(map, pos, 0, map.num_of_cells - 1) != SEARCH_NO_ELEMENT) {
+        printf("map에 (%d, %d)이 있어서 안넣음.\n", pos.row, pos.col);
         return map;
+    }
 
     /* If we need, array doubling. */
     if (map.num_of_cells >= map.capacity) {
@@ -285,9 +285,10 @@ _search_coordinate(map_t map, coordinate_t pos, int left, int right)
             return mid; /* Found out case */
         else /* map.coordinate_arr[mid].col > pos.col */
             return _search_coordinate(map, pos, mid + 1, right);
+    } else {
+        /* map.coordinate_arr[mid].row > pos.row */
+        return _search_coordinate(map, pos, left, mid - 1);
     }
-    /* map.coordinate_arr[mid].row > pos.row */
-    return _search_coordinate(map, pos, left, mid - 1);
 }
 
 /*
