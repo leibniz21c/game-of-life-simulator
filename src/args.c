@@ -28,6 +28,8 @@ static void set_default_options(options_t* options)
 {
     options->help = false;
     options->version = false;
+    options->new = false;
+    options->load = false;
     options->use_colors = true;
 }
 
@@ -47,6 +49,14 @@ switch_options (int arg, options_t* options)
         case 'v':
             options->version = true;
             version();
+            exit(EXIT_SUCCESS);
+        
+        case 'n':
+            options->new = true;
+            exit(EXIT_SUCCESS);
+
+        case 'l':
+            options->load = true;
             exit(EXIT_SUCCESS);
 
         case 0:
@@ -95,13 +105,15 @@ options_parser (int argc, char* argv[], options_t* options)
     {
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, 0, 'v'},
+        {"new", no_argument, 0, 'n'},
+        {"load", no_argument, 0, 'l'},
         {"no-colors", no_argument, 0, 0},
     };
 
     while (true) {
 
         int option_index = 0;
-        arg = getopt_long(argc, argv, "hvt:", long_options, &option_index);
+        arg = getopt_long(argc, argv, "hvnlx:", long_options, &option_index);
 
         /* End of the options? */
         if (arg == -1) break;

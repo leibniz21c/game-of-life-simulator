@@ -28,6 +28,8 @@ struct options
     bool help;
     bool version;
     bool use_colors;
+    bool new;
+    bool load;
     char file_name[FILE_NAME_SIZE];
 };
 
