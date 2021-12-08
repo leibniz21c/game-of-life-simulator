@@ -19,6 +19,81 @@
 #include "game.h"
 
 /*
+ * game constants
+ */
+/* unit direction coordinates */
+static const coordinate_t direction[8] = {
+    {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {1, 0}
+};
+
+/*
+ * Free map
+ */
+void freemap(map_t map)
+{
+    map.num_of_cells = map.capacity = 0; /* If capacity is zero, it is empty map. */
+    free(map.coordinate_arr);
+}
+
+/*
+ * Get cell map to check to move to the next step
+ */
+map_t 
+_get_cell_map_need_to_check(map_t map)
+{
+    int i, j;
+    map_t cellmap = init_map();
+
+    for (i = 0; i < map.num_of_cells;i ++) {
+        cellmap = _cell_birth(
+            cellmap,
+            map.coordinate_arr[i]);
+        for (j = (int)north_east; j < 8; j ++)
+            cellmap = _cell_birth(
+                cellmap,
+                get_onestep_coordinate(
+                    map.coordinate_arr[i],
+                    j));
+    }
+
+    return cellmap;
+}
+
+/*
+ * Get number of adjacent living cells
+ */
+count_t 
+_get_num_of_adjacent_living_cells(map_t map, coordinate_t pos)
+{
+    int i;
+    count_t num_of_adjacent_living_cells = 0;
+
+    /* counting from north east direction to north with clockwise */
+    for (i = (int)north_east; i < 8; i ++)
+        if (_search_coordinate(
+            map,
+            get_onestep_coordinate(pos, i),
+            0,
+            map.num_of_cells - 1)) num_of_adjacent_living_cells ++;
+
+    return num_of_adjacent_living_cells;
+}
+
+
+/*
+ * Get coordinate moved one step from origin coordinate
+ */
+coordinate_t get_onestep_coordinate(coordinate_t pos, direction_t dir)
+{
+    coordinate_t moved;
+
+    moved.row = pos.row + direction[dir].row;
+    moved.col = pos.col + direction[dir].col;
+
+    return moved;
+}
+
+/*
  * Initialize map
  */
 map_t
@@ -149,8 +224,8 @@ _search_coordinate(map_t map, coordinate_t pos, int left, int right)
         else /* map.coordinate_arr[mid].col > pos.col */
             return _search_coordinate(map, pos, mid + 1, right);
     }
-    else /* map.coordinate_arr[mid].row > pos.row */
-        return _search_coordinate(map, pos, left, mid - 1);
+    /* map.coordinate_arr[mid].row > pos.row */
+    return _search_coordinate(map, pos, left, mid - 1);
 }
 
 /*
