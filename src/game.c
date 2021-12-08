@@ -19,16 +19,15 @@
 #include "dynamic-array.h"
 #include "game.h"
 
-/*
- * game constants
+/**
+ * @brief  game constants
  */
-/* unit direction coordinates */
 static const coordinate_t direction[8] = {
     {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {1, 0}
-};
+}; /* unit direction coordinates */
 
-/*
- * Free map
+/**
+ * @brief  Free map
  */
 void freemap(map_t map)
 {
@@ -37,7 +36,8 @@ void freemap(map_t map)
     free(map.coordinate_arr);
 }
 
-/*
+/**
+ * @brief 
  * Copy map
  * return copied_map(map_t)
  * It contains new reference to heap memory which has same values of origin map.
@@ -62,7 +62,8 @@ _copy_map(map_t origin)
     return copied_map;
 }
 
-/*
+/**
+ * @brief 
  * Get cell map to check to move to the next step
  */
 map_t 
@@ -75,15 +76,13 @@ _get_cell_map_need_to_check(map_t map)
         cellmap = _cell_birth(cellmap, map.coordinate_arr[i]);
         for (j = (int)north_east; j < 8; j ++)
             cellmap = _cell_birth(cellmap, get_onestep_coordinate(map.coordinate_arr[i], j));
-        
-        printf("i == %d\n", i);
-        print_map(cellmap);
     }
 
     return cellmap;
 }
 
-/*
+/**
+ * @brief 
  * get next map
  */
 map_t 
@@ -121,7 +120,8 @@ _get_next_map(map_t map)
     return new_map;
 }
 
-/*
+/**
+ * @brief 
  * Get number of adjacent living cells
  */
 count_t 
@@ -138,8 +138,8 @@ _get_num_of_adjacent_living_cells(map_t map, coordinate_t pos)
     return num_of_adjacent_living_cells;
 }
 
-
-/*
+/**
+ * @brief 
  * Get coordinate moved one step from origin coordinate
  */
 coordinate_t 
@@ -153,7 +153,8 @@ get_onestep_coordinate(coordinate_t pos, direction_t dir)
     return moved;
 }
 
-/*
+/**
+ * @brief 
  * Initialize map
  */
 map_t
@@ -166,7 +167,8 @@ init_map()
     return new_map;
 }
 
-/*
+/**
+ * @brief 
  * Birth cell function with O(N)
  */
 map_t
@@ -193,10 +195,8 @@ _cell_birth(map_t map, coordinate_t pos)
      * Since map already living cell at the pos,
      * we don't need to move anything.
      */
-    if (_search_coordinate(map, pos, 0, map.num_of_cells - 1) != SEARCH_NO_ELEMENT) {
-        printf("map에 (%d, %d)이 있어서 안넣음.\n", pos.row, pos.col);
+    if (_search_coordinate(map, pos, 0, map.num_of_cells - 1) != SEARCH_NO_ELEMENT)
         return map;
-    }
 
     /* If we need, array doubling. */
     if (map.num_of_cells >= map.capacity) {
@@ -226,7 +226,8 @@ _cell_birth(map_t map, coordinate_t pos)
     return map;
 }
 
-/*
+/**
+ * @brief 
  * Killing cell function with O(N)
  */
 map_t
@@ -262,7 +263,8 @@ _cell_death(map_t map, coordinate_t pos)
     return map;
 }
 
-/*
+/**
+ * @brief 
  * Implemented with recursive binary search algorithm < O(logN) >.
  * This binary search algorithm aims to sparse matrix search.
  */
@@ -280,18 +282,19 @@ _search_coordinate(map_t map, coordinate_t pos, int left, int right)
     else if (map.coordinate_arr[mid].row == pos.row) {
         /* comparing by col */
         if (map.coordinate_arr[mid].col < pos.col) 
-            return _search_coordinate(map, pos, left, mid - 1);
+            return _search_coordinate(map, pos, mid + 1, right);
         else if (map.coordinate_arr[mid].col == pos.col)
             return mid; /* Found out case */
         else /* map.coordinate_arr[mid].col > pos.col */
-            return _search_coordinate(map, pos, mid + 1, right);
+            return _search_coordinate(map, pos, left, mid - 1);
     } else {
         /* map.coordinate_arr[mid].row > pos.row */
         return _search_coordinate(map, pos, left, mid - 1);
     }
 }
 
-/*
+/**
+ * @brief 
  * Temporal implemented for DEBUG
  */
 void
