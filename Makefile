@@ -48,7 +48,7 @@ CC := cc
 STD := -std=gnu99 # See man gcc for more options
 
 # Flags for compiling
-CFLAGS := -O3 $(STD)
+CFLAGS := -O3 $(STD) -lncurses
 
 # Debug options
 DEBUG := -g3 -DDEBUG=1
