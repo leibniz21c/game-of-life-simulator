@@ -20,68 +20,22 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include <time.h>
+#include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <termios.h>
-#include <pthread.h>
 
+#include "args.h"
 #include "game.h"
 #include "renderer.h"
 
 /* Global var */
-map_t curr_map, next_map;
+char glb_file_name[FILE_NAME_SIZE];
+map_t curr_map;
 game_status_t game_status = STATUS_NO_STATE;
-pthread_t thread_cell_map_rendering;
-
-/**
- * @brief 
- * Create new cell map
- */
-void
-new_cell_map(const char *file_name)
-{
-    struct sigaction iosig;
-    int fcntl_flag;
-
-    _init_game_window_setting(); /* Initialize setting */
-    _render_grid(); /* Draw grid */
-    render_upper_interface(file_name); /* Draw interface */
-    refresh();
-
-    /*
-    curr_map = init_map();
-    render_map();
-    */
-
-    /*
-     * start to get SIGIO asynchronous keyboard input 
-     */
-    /* Set sigaction and handler */
-    iosig.sa_handler = keyboard_io_handler;
-    sigemptyset(&iosig.sa_mask);
-    iosig.sa_flags = 0;
-
-    if (sigaction(SIGIO, &iosig, 0) == -1) {
-        fprintf(stderr, "sigaction: error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Set stdin to async mode */
-    fcntl_flag = fcntl(0, F_GETFL, 0);
-    fcntl_flag |= O_ASYNC;
-    fcntl(0, F_SETFL, fcntl_flag);
-
-    /* If SIGIO is generated with stdin, only this process can get it. */
-    fcntl(0, F_SETOWN, getpid());
-
-    /* DEBUG */
-    while (1) sleep(1);
-    
-    /* Termination */
-    endwin();
-}
+struct itimerval default_timeset, start_timeset, fast_start_timeset;
 
 /**
  * @brief 
@@ -93,12 +47,6 @@ keyboard_io_handler(int signo)
     key_t input;
 	sigset_t sigset, oldset;
 	sigfillset(&sigset);	
-
-	/* Block another signals */
-	if (sigprocmask(SIG_BLOCK, &sigset, &oldset) < 0) {
-		fprintf(stderr, "sigprocmask: %d error\n", signo);
-        exit(EXIT_FAILURE);
-	}
     
     /* Get keyboard input */
     if ((input = wgetch(stdscr)) == ERR) {
@@ -110,33 +58,84 @@ keyboard_io_handler(int signo)
     switch (input) {
         case KEY_F(1):
             game_status = STATUS_F1_START; /* set status flag */
+            /* interface standout mode */
+            _render_standout_interface_element();   
+            
+            /* print message */
             clear_message();
             print_message("F1 Pressed");
 
+            /* Game start courutine */
+            signal(SIGALRM, status_start_alarm_handler);
+            setitimer(ITIMER_REAL, &start_timeset, NULL);
 
-            /*********************************/
-            /* TODO : start cellur automaton */
-            /* Until status != F1            */
-            /*********************************/
             break;
         case KEY_F(2):
             game_status = STATUS_F2_STOP;
+            /* interface standout mode */
+            _render_standout_interface_element();   
+            
+            /* print message */
             clear_message();
             print_message("F2 Pressed");
+
+            /* Game stop */
+            signal(SIGALRM, SIG_IGN);
+            setitimer(ITIMER_REAL, &default_timeset, NULL);
             
             break;
         case KEY_F(3):
             game_status = STATUS_F3_FAST_START;
+            /* interface standout mode */
+            _render_standout_interface_element();   
+            
+            /* print message */
+            clear_message();
+            print_message("F3 Pressed");
+
+            /* Game start courutine */
+            signal(SIGALRM, status_start_alarm_handler);
+            setitimer(ITIMER_REAL, &fast_start_timeset, NULL);
 
             break;
         case KEY_F(4):
             game_status = STATUS_F4_MODIFY;
-            game_mode_modify();
+            /* interface standout mode */
+            _render_standout_interface_element();   
+            
+            /* print message */
+            clear_message();
+            print_message("F4 Pressed");
 
+            /* Game stop */
+            signal(SIGALRM, SIG_IGN);
+            setitimer(ITIMER_REAL, &default_timeset, NULL);
+
+            game_mode_modify();
             break;
         case KEY_F(5):
             game_status = STATUS_F5_SAVE;
+            /* interface standout mode */
+            _render_standout_interface_element();  
 
+            /* print message */
+            clear_message();
+            print_message("F5 Pressed"); 
+
+            /* Game stop */
+            signal(SIGALRM, SIG_IGN);
+            setitimer(ITIMER_REAL, &default_timeset, NULL);
+
+            /* print message     */
+            clear_message();
+            print_message("Saving...");
+
+            /* Save instance */
+            save_instance(glb_file_name, curr_map);
+
+            /* print message */
+            clear_message();
+            print_message("Save success!");
             break;
         case 'q':
             // tty_mode(1); /* rollback terminal setting */
@@ -145,9 +144,19 @@ keyboard_io_handler(int signo)
         default:
             break;
     }
-    /* interface standout mode */
-    _render_standout_interface_element();
 
+}
+
+/**
+ * @brief 
+ * Start game routine with normal speed
+ */
+void 
+status_start_alarm_handler(int signo)
+{
+    _erasing_cell_map(curr_map);
+    curr_map = _get_next_map(curr_map);
+    _rendering_cell_map(curr_map);
 }
 
 /**
@@ -282,10 +291,46 @@ _render_grid()
  * rendering cell map : coroutine
  */
 void
-_rendering_cell_map()
+_rendering_cell_map(map_t map)
 {
+    int i;
+    char *mark = "  ";
+    coordinate_t coord;
 
-    // TODO : cell map rendering, create corutines
+    standout();
+    /* one by one cell marking */
+    for (i = 0 ;i < map.num_of_cells;i ++) {
+        coord = transform_game2curse_coordinate(map.coordinate_arr[i]);
+        
+        /* If this cooordinate is not valid, remove this cell. */
+        if (!is_valid_coordinate(coord)) {
+            map = _cell_death(map, coord);
+            i --;
+        } 
+        else 
+            mvaddstr(coord.row, coord.col, mark);
+    }
+    standend();
+    refresh();
+}
+
+/**
+ * @brief 
+ * erasing cell map : coroutine
+ */
+void
+_erasing_cell_map(map_t map)
+{
+    int i;
+    char *mark = "  ";
+    coordinate_t coord;
+
+    /* one by one cell marking */
+    for (i = 0 ;i < map.num_of_cells;i ++) {
+        coord = transform_game2curse_coordinate(map.coordinate_arr[i]);
+        mvaddstr(coord.row, coord.col, mark);
+    }
+    refresh();
 }
 
 
@@ -297,6 +342,7 @@ void
 print_message(const char *msg)
 {
     mvwaddstr(stdscr, LINES - 2, 1, msg);
+    refresh();
 }
 
 /**
@@ -311,18 +357,119 @@ clear_message()
     move(LINES - 2, 1);
     for (i = 1; i < COLS - 2; i ++)
         addch(' ');
+    refresh();
 }
 
+/**
+ * @brief 
+ * Create game with new cell map
+ */
+void new_game(const char *file_name)
+{
+    time_t time_now = time(NULL);
+
+    /* Create empty map */
+    curr_map = init_map();
+
+    /* No file name */
+    if (!strcmp(file_name, "-"))
+        sprintf(glb_file_name, "%ld.grf", time_now);
+    else 
+        strcpy(glb_file_name, file_name);
+
+    _create_game();
+}
+
+/**
+ * @brief 
+ * Create game with loaded cell map
+ */
+void load_game(const char *file_name)
+{
+    /* Globalize file name */
+    strcpy(glb_file_name, file_name);
+
+    /* Load map */
+    curr_map = load_file(glb_file_name);
+
+    _create_game();
+}
+
+/**
+ * @brief 
+ * Create new cell map
+ */
+void
+_create_game()
+{
+    struct sigaction iosig;
+    int fcntl_flag;
+
+    /*
+     * curses setting
+     */
+    _init_game_window_setting(); /* Initialize setting */
+    _render_grid(); /* Draw grid */
+    render_upper_interface(glb_file_name); /* Draw interface */
+    refresh();
+
+    /*
+     * start to get SIGIO asynchronous keyboard input 
+     */
+    /* Set sigaction and handler */
+    iosig.sa_handler = keyboard_io_handler;
+    sigemptyset(&iosig.sa_mask);
+    iosig.sa_flags = 0;
+
+    if (sigaction(SIGIO, &iosig, 0) == -1) {
+        fprintf(stderr, "sigaction: error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Set stdin to async mode */
+    fcntl_flag = fcntl(0, F_GETFL, 0);
+    fcntl_flag |= O_ASYNC;
+    fcntl(0, F_SETFL, fcntl_flag);
+
+    /* If SIGIO is generated with stdin, only this process can get it. */
+    fcntl(0, F_SETOWN, getpid());
+
+    /*
+     * itimer initialize
+     */
+    default_timeset.it_value.tv_sec = __ITIMER_DEFAULT_VALUE_SEC;
+    default_timeset.it_value.tv_usec = __ITIMER_DEFAULT_VALUE_USEC;
+    default_timeset.it_interval.tv_sec = __ITIMER_DEFAULT_INTERVAL_SEC;
+    default_timeset.it_interval.tv_usec = __ITIMER_DEFAULT_INTERVAL_USEC;
+    start_timeset.it_value.tv_sec = __ITIMER_START_VALUE_SEC;
+    start_timeset.it_value.tv_usec = __ITIMER_START_VALUE_USEC;
+    start_timeset.it_interval.tv_sec = __ITIMER_START_INTERVAL_SEC;
+    start_timeset.it_interval.tv_usec = __ITIMER_START_INTERVAL_USEC;
+    fast_start_timeset.it_value.tv_sec = __ITIMER_FAST_START_VALUE_SEC;
+    fast_start_timeset.it_value.tv_usec = __ITIMER_FAST_START_VALUE_USEC;
+    fast_start_timeset.it_interval.tv_sec = __ITIMER_FAST_START_INTERVAL_SEC;
+    fast_start_timeset.it_interval.tv_usec = __ITIMER_FAST_START_INTERVAL_USEC;
+
+
+    /* DEBUG */
+    _rendering_cell_map(curr_map);
+    while (1) sleep(1);
+    
+    /* Termination */
+    endwin();
+}
 
 /**
  * @brief 
  * modify mode rendering
  */
-key_t
+void
 game_mode_modify()
 {
     coordinate_t pos = {LINES/2, COLS/2};
     key_t input;
+
+    key_t temp = KEY_F(1);
 
     /* Move to initial position */
     curs_set(1);
@@ -353,17 +500,26 @@ game_mode_modify()
                 if (is_valid_coordinate(pos)) move(pos.row, pos.col);
                 else pos.col += 2;
                 break;
-            case KEY_ENTER:
-                _cell_birth(curr_map, 
+            case '\n': /* KEY_RETURN */
+                curr_map = _cell_birth(curr_map, 
                             transform_curse2game_coordinate(pos));
+                _rendering_cell_map(curr_map);
+                move(pos.row, pos.col);
                 break;
             case KEY_BACKSPACE:
-                _cell_death(curr_map, 
+                _erasing_cell_map(curr_map);
+                curr_map = _cell_death(curr_map, 
                             transform_curse2game_coordinate(pos));
+                _rendering_cell_map(curr_map);
+                move(pos.row, pos.col);
                 break;
             
             case 'q':      case KEY_F(1): case KEY_F(2):
-            case KEY_F(3): case KEY_F(4): case KEY_F(5): return input;
+            case KEY_F(3): case KEY_F(5): 
+                curs_set(0);
+                clear_message();
+                print_message("Are you sure? Please press the button one more time!");
+                return;
             default:
                 break;
         }

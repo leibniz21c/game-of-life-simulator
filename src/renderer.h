@@ -43,22 +43,43 @@ typedef char game_status_t;
 #define IS_STATE_F4_MODIFY(s)       (s & (char)0x08)
 #define IS_STATE_F5_SAVE(s)         (s & (char)0x10)
 
+/* Timer constant */
+#define __ITIMER_DEFAULT_VALUE_SEC          0L
+#define __ITIMER_DEFAULT_VALUE_USEC         0L
+#define __ITIMER_START_VALUE_SEC            0L
+#define __ITIMER_START_VALUE_USEC           500000L
+#define __ITIMER_FAST_START_VALUE_SEC       0L
+#define __ITIMER_FAST_START_VALUE_USEC      250000L
+
+#define __ITIMER_DEFAULT_INTERVAL_SEC       0L
+#define __ITIMER_DEFAULT_INTERVAL_USEC      0L
+#define __ITIMER_START_INTERVAL_SEC         0L
+#define __ITIMER_START_INTERVAL_USEC        500000L
+#define __ITIMER_FAST_START_INTERVAL_SEC    0L
+#define __ITIMER_FAST_START_INTERVAL_USEC   250000L
+
 /* Key type */
 typedef int key_t;
 
-void new_cell_map(const char *file_name);
 void keyboard_io_handler(int signo);
+void status_start_alarm_handler(int signo);
 void _render_standout_interface_element();
 void render_upper_interface(const char *file_name);
 void render_map();
 void _init_game_window_setting();
 void _render_grid();
-void _rendering_cell_map();
+void _rendering_cell_map(map_t map);
+void _erasing_cell_map(map_t map);
 
 void print_message(const char *msg);
 void clear_message();
 
-key_t game_mode_modify();
+void new_game(const char *file_name);
+void load_game(const char *file_name);
+void _create_game();
+void game_mode_start();
+void game_mode_modify();
+
 coordinate_t transform_curse2game_coordinate(coordinate_t origin);
 coordinate_t transform_game2curse_coordinate(coordinate_t origin);
 bool is_valid_coordinate(coordinate_t origin);
