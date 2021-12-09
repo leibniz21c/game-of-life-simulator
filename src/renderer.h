@@ -48,9 +48,19 @@ typedef int key_t;
 
 void new_cell_map(const char *file_name);
 void keyboard_io_handler(int signo);
-void render_interface(const char *file_name);
+void _render_standout_interface_element();
+void render_upper_interface(const char *file_name);
 void render_map();
 void _init_game_window_setting();
 void _render_grid();
+void _rendering_cell_map();
+
+void print_message(const char *msg);
+void clear_message();
+
+key_t game_mode_modify();
+coordinate_t transform_curse2game_coordinate(coordinate_t origin);
+coordinate_t transform_game2curse_coordinate(coordinate_t origin);
+bool is_valid_coordinate(coordinate_t origin);
 
 #endif // end of #ifndef RENDERER_H
