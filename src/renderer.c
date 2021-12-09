@@ -13,16 +13,24 @@
  *
  * ============================================================================
  */
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
+#include <stdbool.h>
 #include <time.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <termios.h>
 
 #include "game.h"
 #include "renderer.h"
 
 /* Global var */
 map_t curr_map, next_map;
+game_status_t game_status = STATUS_NO_STATE;
 
 /**
  * @brief 
@@ -31,17 +39,102 @@ map_t curr_map, next_map;
 void
 new_cell_map(const char *file_name)
 {
-    _init_game_window_setting();
-    _render_grid();
-    render_interface(file_name);
+    struct sigaction iosig;
+    int fcntl_flag;
+
+    _init_game_window_setting(); /* Initialize setting */
+    _render_grid(); /* Draw grid */
+    render_interface(file_name); /* Draw interface */
     refresh();
 
+    /*
+    curr_map = init_map();
+    render_map();
+    */
+
+    /*
+     * start to get SIGIO asynchronous keyboard input 
+     */
+    /* Set sigaction and handler */
+    iosig.sa_handler = keyboard_io_handler;
+    sigemptyset(&iosig.sa_mask);
+    iosig.sa_flags = 0;
+
+    if (sigaction(SIGIO, &iosig, 0) == -1) {
+        fprintf(stderr, "sigaction: error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Set stdin to async mode */
+    fcntl_flag = fcntl(0, F_GETFL, 0);
+    fcntl_flag |= O_ASYNC;
+    fcntl(0, F_SETFL, fcntl_flag);
+
+    /* If SIGIO is generated with stdin, only this process can get it. */
+    fcntl(0, F_SETOWN, getpid());
+
+    /* DEBUG */
+    while (1) sleep(1);
     
-    getch();
-    getch();
-    getch();
+    /* Termination */
     endwin();
 }
+
+/**
+ * @brief 
+ * Get user keyboard input like F1, F2, F3, ..., Enter, rightarrow, q, ESC and execute.
+ */
+void 
+keyboard_io_handler(int signo)
+{
+    key_t input;
+	sigset_t sigset, oldset;
+	sigfillset(&sigset);	
+
+	/* Block another signals */
+	if (sigprocmask(SIG_BLOCK, &sigset, &oldset) < 0) {
+		fprintf(stderr, "sigprocmask: %d error\n", signo);
+        exit(EXIT_FAILURE);
+	}
+    
+    /* Get keyboard input */
+    if ((input = wgetch(stdscr)) == ERR) {
+		fprintf(stderr, "SIGIO asynchronous read() error\n");
+        exit(EXIT_FAILURE);
+    }
+	
+    /* key processing */
+    switch (input) {
+        case KEY_F(1):
+            mvprintw(LINES/2, COLS/2, "f1");
+            refresh();
+            break;
+        case KEY_F(2):
+            /* code */
+            mvprintw(LINES/2, COLS/2, "f2");
+            refresh();
+            break;
+        case KEY_F(3):
+            /* code */
+            break;
+        case KEY_F(4):
+            /* code */
+            break;
+        case KEY_F(5):
+            /* code */
+            break;
+        
+        default:
+            break;
+    }
+}
+
+/**
+ * @brief 
+ * interface element standout
+ */
+void
+_render_standout_interface_element();
 
 /**
  * @brief 
@@ -97,7 +190,7 @@ _init_game_window_setting()
     /* Init key setting */
     cbreak(); /* Line buffering disabled */
     noecho(); /* Turn off the echo */
-    keypad(stdscr, TRUE); /* Interactive mode key available */
+    keypad(stdscr, true); /* Special key inputs available */
     
     /* Init cursor setting */
     curs_set(0); /* cursor size zero */
