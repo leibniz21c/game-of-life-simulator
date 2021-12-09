@@ -19,6 +19,7 @@
 
 #include "args.h"
 #include "colors.h"
+#include "game.h"
 #include "renderer.h"
 
 int
@@ -28,20 +29,11 @@ main (int argc, char* argv[])
     options_t options;
     options_parser(argc, argv, &options);
 
-#ifdef DEBUG
-    fprintf(stdout, BLUE "Command line options:\n" NO_COLOR);
-    fprintf(stdout, BROWN "help: %d\n" NO_COLOR, options.help);
-    fprintf(stdout, BROWN "version: %d\n" NO_COLOR, options.version);
-    fprintf(stdout, BROWN "use colors: %d\n" NO_COLOR, options.use_colors);
-    fprintf(stdout, BROWN "filename: %s\n" NO_COLOR, options.file_name);
-#endif
-
-    if (options.new) /* User select --new */
-        new_cell_map(options.file_name);
-    else if (options.load) {
-        /* load cell map */
-        options.load;
-    }
+    if (options.new)                    /* -n|--new  */
+        new_game(options.file_name);
+    else if (options.load)              /* -l|--load */
+        load_game(options.file_name);
+    
 
     return EXIT_SUCCESS;
 }
