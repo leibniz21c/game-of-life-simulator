@@ -51,7 +51,7 @@ STD := -std=gnu99 # See man gcc for more options
 CFLAGS := -O3 $(STD) -lncurses
 
 # Debug options
-DEBUG := -g3 -DDEBUG=1
+DEBUG := -g3 -DDEBUG=0
 
 # Dependency libraries
 LIBS := # -lm  -I some/path/to/library
