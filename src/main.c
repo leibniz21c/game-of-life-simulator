@@ -15,9 +15,11 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h>
 
 #include "args.h"
 #include "colors.h"
+#include "renderer.h"
 
 int
 main (int argc, char* argv[])
@@ -33,9 +35,13 @@ main (int argc, char* argv[])
     fprintf(stdout, BROWN "use colors: %d\n" NO_COLOR, options.use_colors);
     fprintf(stdout, BROWN "filename: %s\n" NO_COLOR, options.file_name);
 #endif
-    
-    
 
+    if (options.new) /* User select --new */
+        new_cell_map(options.file_name);
+    else if (options.load) {
+        /* load cell map */
+        options.load;
+    }
 
     return EXIT_SUCCESS;
 }
