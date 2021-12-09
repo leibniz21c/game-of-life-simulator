@@ -53,11 +53,11 @@ switch_options (int arg, options_t* options)
         
         case 'n':
             options->new = true;
-            exit(EXIT_SUCCESS);
+            break;
 
         case 'l':
             options->load = true;
-            exit(EXIT_SUCCESS);
+            break;
 
         case 0:
             options->use_colors = false;
@@ -111,7 +111,6 @@ options_parser (int argc, char* argv[], options_t* options)
     };
 
     while (true) {
-
         int option_index = 0;
         arg = getopt_long(argc, argv, "hvnlx:", long_options, &option_index);
 
