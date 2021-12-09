@@ -57,10 +57,4 @@ int _search_coordinate(map_t map, coordinate_t pos, int left, int right);
 void print_map(map_t map);
 
 
-
-
-
-
-
-
 #endif /* end of #ifndef GAME_H */
