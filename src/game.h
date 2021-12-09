@@ -27,6 +27,8 @@
 #define RULE2_CONSTANT1 2 /* If living cell adjacent with '2' living cells, then the cell keeps alive. */
 #define RULE2_CONSTANT2 3 /* If living cell adjacent with '3' living cells, then the cell keeps alive. */
 
+#define LOAD_MAP_INIT_CAPACITY 1024
+
 /* direction */
 typedef enum {north_east, east, south_east, south, south_west, west, north_west} direction_t;
 
@@ -34,7 +36,7 @@ typedef enum {north_east, east, south_east, south, south_west, west, north_west}
  * Types
  */
 typedef unsigned long long count_t; /* counting variable types */
-typedef struct { int row, col; } coordinate_t; /* coordinate type */
+typedef struct { int row; int col; } coordinate_t; /* coordinate type */
 typedef struct { count_t num_of_cells, capacity; coordinate_t *coordinate_arr; } map_t; /* map type */
 
 /*
@@ -55,6 +57,9 @@ int _search_coordinate(map_t map, coordinate_t pos, int left, int right);
  * Temporal implemented for DEBUG
  */
 void print_map(map_t map);
-
+void save_instance(const char *file_name, map_t map);
+void write_map(int fd, map_t map);                      /* IPC Protocol */
+map_t load_file(const char *file_name);
+map_t read_map(int fd);                                 /* IPC Protocol */
 
 #endif /* end of #ifndef GAME_H */

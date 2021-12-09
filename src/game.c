@@ -15,6 +15,8 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "dynamic-array.h"
 #include "game.h"
@@ -322,4 +324,102 @@ print_map(map_t map)
             map.coordinate_arr[i].col);
         if (!((i + 1)%4)) putchar('\n');
     }
+}
+
+/**
+ * @brief 
+ * Save map to file (grf)
+ */
+void 
+save_instance(const char *file_name, map_t map)
+{
+    int fd, i;
+
+    if ((fd = open(file_name, O_WRONLY | O_CREAT, 0644)) == -1) {
+        fprintf(stderr, "open: save_instance error\n");
+        exit(EXIT_FAILURE);
+    }
+    write_map(fd, map);
+}
+
+/**
+ * @brief 
+ * Write map to fd 
+ */
+void 
+write_map(int fd, map_t map)
+{
+    int i;
+
+    /* Write metadatas */
+    if (write(fd, (void *)&map.num_of_cells, sizeof(map.num_of_cells)) == -1) {
+        fprintf(stderr, "write: map.num_of_cells error\n");
+        exit(EXIT_FAILURE);
+    }
+    if (write(fd, (void *)&map.capacity, sizeof(map.capacity)) == -1) {
+        fprintf(stderr, "write: map.capacity error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Write datas */
+    for (i = 0 ;i < map.num_of_cells; i ++) {
+        if (write(fd, (void *)&map.coordinate_arr[i], sizeof(coordinate_t)) == -1) {
+            fprintf(stderr, "write: map.coordinate %d element error\n", i);
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+/**
+ * @brief 
+ * Load map from file (grf)
+ */
+map_t 
+load_file(const char *file_name)
+{
+    int fd, i;
+    
+    if ((fd = open(file_name, O_RDONLY)) == -1) {
+        fprintf(stderr, "open: load file error. Is there a %s?\n", file_name);
+        exit(EXIT_FAILURE);
+    }
+    return read_map(fd);
+}
+
+/**
+ * @brief 
+ * Read map from fd 
+ */
+map_t 
+read_map(int fd)
+{
+    map_t map = init_map();
+    coordinate_t temp_coord;
+    count_t temp;
+    int i;
+
+    map.capacity = LOAD_MAP_INIT_CAPACITY;
+    map.coordinate_arr = create_arr(map.capacity, sizeof(*map.coordinate_arr));
+
+    /* Read metadatas */
+    if (read(fd, (void *)&map.num_of_cells, sizeof(map.num_of_cells)) == -1) {
+        fprintf(stderr, "read: map.num_of_cells error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (read(fd, (void *)&temp, sizeof(temp)) == -1) {
+        fprintf(stderr, "read: map.capacity error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Write datas */
+    for (i = 0 ;i < map.num_of_cells; i ++) {
+        if (read(fd, (void *)&temp_coord, sizeof(temp_coord)) == -1) {
+            fprintf(stderr, "write: map.coordinate %d element error\n", i);
+            exit(EXIT_FAILURE);
+        }
+        map = _cell_birth(map, temp_coord);
+    }
+
+    return map;
 }
