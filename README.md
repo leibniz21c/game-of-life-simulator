@@ -24,26 +24,7 @@ It was initially introduced as a math game. The feature is that countless rules 
 
 ## Rules
 
-<img src="https://latex.codecogs.com/gif.latex?O_t=\text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}" />
-
-'''math
-\text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}
-```
-
-```math
-\text{If} \,\ C(i, j, t) \,\ \text{which is dead cell is adjacent with 3 living cells when the time is} \,\ t \text{, then} \,\ 
-C(i, j, t + 1) \,\ \text{is living cell.}
-```
-
-```math
-\text{Else if} \,\ C(i, j, t) \,\ \text{which is living cell is adjacent with 2 or 3 living cells when the time is} \,\ t \text{, then} \,\ 
-C(i, j, t + 1) \,\ \text{is living cell.}
-```
-
-```math
-\text{Else} \,\ C(i, j, t + 1) \,\ \text{is dead cell.} \quad (\because \,\ \text{the surroundings become too complex or stay dead.})
-```
-
+<img width="1069" alt="스크린샷 2021-12-12 오후 9 28 28" src="https://user-images.githubusercontent.com/38760913/145712201-c9d18268-017e-4a92-948a-b83bd1c4e91b.png">
 <br>
 
 ## Installation
