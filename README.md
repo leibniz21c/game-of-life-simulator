@@ -25,6 +25,8 @@ It was initially introduced as a math game. The feature is that countless rules 
 ## Rules
 ---
 
+<img src="https://latex.codecogs.com/gif.latex?O_t=\text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}" />
+
 '''math
 \text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}
 ```
