@@ -23,7 +23,6 @@ It was initially introduced as a math game. The feature is that countless rules 
 <br>
 
 ## Rules
----
 
 <img src="https://latex.codecogs.com/gif.latex?O_t=\text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}" />
 
@@ -48,7 +47,7 @@ C(i, j, t + 1) \,\ \text{is living cell.}
 <br>
 
 ## Installation
----
+
 ```
 Fighting
 ```
@@ -56,14 +55,14 @@ Fighting
 <br>
 
 ## Usage
----
+
 ```
 Pass
 ```
 <br>
 
 ## In game animation
----
+
 1. Building map <br>
 
 ![buliding map](https://user-images.githubusercontent.com/38760913/145711525-d02a4be4-6697-47e7-8e3b-fc38c9772627.gif)
@@ -78,6 +77,6 @@ Pass
 <br>
 
 ## Update log
----
+
 1. 2021.12.09 - Version 1.0.0 Release
 2. fwefawef
