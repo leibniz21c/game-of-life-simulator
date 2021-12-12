@@ -64,15 +64,17 @@ Pass
 
 ## In game animation
 ---
-1. Building map
+1. Building map <br>
+
 ![buliding map](https://user-images.githubusercontent.com/38760913/145711525-d02a4be4-6697-47e7-8e3b-fc38c9772627.gif)
+<br>
+2. Loading map <br>
 
-2. Loading map
 ![game load](https://user-images.githubusercontent.com/38760913/145711515-18e996cc-6471-4c8a-8115-2e16a26bdbd6.gif)
+<br>
+3. Simulation <br>
 
-3. Simulation
 ![simulation](https://user-images.githubusercontent.com/38760913/145711529-296e5c92-fab5-4bf2-b430-c705c1b93de2.gif)
-
 <br>
 
 ## Update log
