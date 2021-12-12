@@ -1,4 +1,5 @@
 
+
    _____                               _                                           __   _ _  __           _                 _       _             
   / ____|                             ( )                                         / _| | (_)/ _|         (_)               | |     | |            
  | |     ___  _ ____      ____ _ _   _|/ ___    __ _  __ _ _ __ ___   ___    ___ | |_  | |_| |_ ___   ___ _ _ __ ___  _   _| | __ _| |_ ___  _ __ 
@@ -24,23 +25,23 @@ It was initially introduced as a math game. The feature is that countless rules 
 ## Rules
 ---
 
-$
+'''math
 \text{Let the game board be } C_{m \times n \times t} \,\ \text{which is} \,\ m \times n \times t \,\ \text{tensor.}
-$
+```
 
-$
+```math
 \text{If} \,\ C(i, j, t) \,\ \text{which is dead cell is adjacent with 3 living cells when the time is} \,\ t \text{, then} \,\ 
 C(i, j, t + 1) \,\ \text{is living cell.}
-$
+```
 
-$
+```math
 \text{Else if} \,\ C(i, j, t) \,\ \text{which is living cell is adjacent with 2 or 3 living cells when the time is} \,\ t \text{, then} \,\ 
 C(i, j, t + 1) \,\ \text{is living cell.}
-$
+```
 
-$
+```math
 \text{Else} \,\ C(i, j, t + 1) \,\ \text{is dead cell.} \quad (\because \,\ \text{the surroundings become too complex or stay dead.})
-$
+```
 
 <br>
 
