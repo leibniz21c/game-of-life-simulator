@@ -335,22 +335,19 @@ save_instance(const char *file_name, map_t map)
 {
     int fd, i, pid;
 
-    if ((pid = folk()) == -1) {
+    if ((pid = fork()) == -1) {
         fprintf(stderr, "folk: error!\n");
         exit(EXIT_FAILURE);
     }
     
-    switch (pid) {
-        case 0:
-            break;
-        default:
-            /* Storing by child process. */
-            if ((fd = open(file_name, O_WRONLY | O_CREAT, 0644)) == -1) {
-                fprintf(stderr, "open: save_instance error\n");
-                exit(EXIT_FAILURE);
-            }
-            write_map(fd, map);     
-            exit(EXIT_SUCCESS);  
+    if (pid == 0) {    
+        /* Storing by child process. */
+        if ((fd = open(file_name, O_WRONLY | O_CREAT, 0644)) == -1) {
+            fprintf(stderr, "open: save_instance error\n");
+            exit(EXIT_FAILURE);
+        }
+        write_map(fd, map);     
+        exit(EXIT_SUCCESS);  
     }
 }
 
