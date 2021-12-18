@@ -333,13 +333,25 @@ print_map(map_t map)
 void 
 save_instance(const char *file_name, map_t map)
 {
-    int fd, i;
+    int fd, i, pid;
 
-    if ((fd = open(file_name, O_WRONLY | O_CREAT, 0644)) == -1) {
-        fprintf(stderr, "open: save_instance error\n");
+    if ((pid = folk()) == -1) {
+        fprintf(stderr, "folk: error!\n");
         exit(EXIT_FAILURE);
     }
-    write_map(fd, map);
+    
+    switch (pid) {
+        case 0:
+            break;
+        default:
+            /* Storing by child process. */
+            if ((fd = open(file_name, O_WRONLY | O_CREAT, 0644)) == -1) {
+                fprintf(stderr, "open: save_instance error\n");
+                exit(EXIT_FAILURE);
+            }
+            write_map(fd, map);     
+            exit(EXIT_SUCCESS);  
+    }
 }
 
 /**
