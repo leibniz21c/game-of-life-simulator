@@ -37,8 +37,26 @@ Fighting
 
 ## Usage
 
-```
-Pass
+```shell
+Usage: gol [options] [file_name]
+
+Description: This is a celluar automaton called Conway's Game of Life. 
+Options:
+
+        -v|--version
+                Prints gol version
+
+        -h|--help
+                Prints this help message
+
+        -n|--new or -n|--new [file_name]
+                Create new cell map
+
+        -l|--load [file_name]
+                Create new cell map
+
+        --no-color
+                Does not use colors for printing
 ```
 <br>
 
