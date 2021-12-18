@@ -25,5 +25,5 @@ echo "--------------------------------------------------------------------------
 echo "Installation..."
 make
 echo "copy to /usr/local/bin"
-#sudo mv bin/gol /usr/local/bin
+sudo mv bin/gol /usr/local/bin
 echo "Complete!"
