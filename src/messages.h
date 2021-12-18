@@ -17,7 +17,7 @@
 #define MESSAGES_H
 
 #define __PROGRAM_NAME__ "gol"
-#define __PROGRAM_VERSION__ "1.0.0"
+#define __PROGRAM_VERSION__ "1.0.1"
 #define __PROGRAM_AUTHOR__ "Heesung Yang (leibniz21c@gmail.com)"
 
 void help ();
