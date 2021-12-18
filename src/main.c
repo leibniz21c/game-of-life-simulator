@@ -18,6 +18,7 @@
 #include <ncurses.h>
 
 #include "args.h"
+#include "messages.h"
 #include "colors.h"
 #include "game.h"
 #include "renderer.h"
@@ -33,7 +34,8 @@ main (int argc, char* argv[])
         new_game(options.file_name);
     else if (options.load)              /* -l|--load */
         load_game(options.file_name);
-    
+    else 
+        help();
 
     return EXIT_SUCCESS;
 }
