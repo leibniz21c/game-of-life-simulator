@@ -30,7 +30,9 @@ It was initially introduced as a math game. The feature is that countless rules 
 ## Installation
 
 ```
-Fighting
+$ git clone https://github.com/ndo04343/game-of-life-simulator/
+$ cd game-of-life-simulator
+$ ./setup.sh
 ```
 
 <br>
